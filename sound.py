@@ -60,10 +60,15 @@ class MonoSample():
 
     @value.setter
     def value(self, val):
-        self.samp_array[self.__index] = int(val)
+        self.samp_array[self.__index] = self.__clamp(val)
 
     def __eq__(self, other):
         return self.value == other.value
+
+    def __clamp(self, val):
+        """Return the value clamped to the allowed range of the sample encoding."""
+        iinfo = numpy.iinfo(self.samp_array.dtype)
+        return numpy.clip(val, iinfo.min, iinfo.max)
 
 
 class StereoSample():
@@ -114,7 +119,7 @@ class StereoSample():
         if not isinstance(new_left_val, int):
             raise TypeError("Channel value must be an int")
 
-        self.__all_samples[self.__index, 0] = new_left_val
+        self.__all_samples[self.__index, 0] = self.__clamp(new_left_val)
 
 
     @property
@@ -128,7 +133,7 @@ class StereoSample():
         if not isinstance(new_right_val, int):
             raise TypeError("Channel value must be an int")
 
-        self.__all_samples[self.__index, 1] = int(new_right_val)
+        self.__all_samples[self.__index, 1] = self.__clamp(new_right_val)
 
     def __eq__(self, other):
         """
@@ -146,6 +151,11 @@ class StereoSample():
         return self.left == other.left \
                 and self.right == other.right
 
+
+    def __clamp(self, val):
+        """Return the value clamped to the allowed range of the sample encoding."""
+        iinfo = numpy.iinfo(self.__all_samples.dtype)
+        return numpy.clip(val, iinfo.min, iinfo.max)
 
 class Sound():
     """
